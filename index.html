@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFJS</title>
+</head>
+<body>
+  <h1>Tp TensorFlowJs Expo</h1>
+  <input type="file" accept="image/*" onchange="cargarImagen(event)" />
+
+  <div id="imagen-container"></div>
+  <ul id="predicciones"></ul>
+
+  <!-- Load TensorFlow.js. This is required to use MobileNet. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"> </script>
+  <!-- Load the MobileNet model. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"> </script>
+
+  <!-- Place your code in the script tag below. You can also use an external .js file -->
+  <script>
+    function cargarImagen(event) {
+      const archivo = event.target.files[0];
+      const lector = new FileReader();
+
+      lector.onload = function(e) {
+        const imagenContainer = document.getElementById("imagen-container");
+        const prediccionesContainer = document.getElementById("predicciones");
+
+        // Borrar la imagen anterior
+        while (imagenContainer.firstChild) {
+          imagenContainer.removeChild(imagenContainer.firstChild);
+        }
+
+        // Borrar las predicciones anteriores
+        prediccionesContainer.innerHTML = "";
+
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        imagenContainer.appendChild(img);
+
+        // Load the model.
+        mobilenet.load().then(model => {
+          // Classify the image.
+          model.classify(img).then(predictions => {
+            console.log('Predictions:');
+            console.log(predictions);
+
+            // Mostrar las predicciones en el HTML
+            predictions.forEach(prediction => {
+              const li = document.createElement("li");
+              li.textContent = `${prediction.className}: ${Math.round(prediction.probability * 100)}%`;
+              prediccionesContainer.appendChild(li);
+            });
+          });
+        });
+      };
+
+      lector.readAsDataURL(archivo);
+    }
+  </script>
+</body>
+</html>
